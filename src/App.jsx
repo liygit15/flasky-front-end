@@ -1,7 +1,8 @@
 import './App.css';
-import DATA from './data';
+// import DATA from './data';
 import CatList from './components/CatList';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 const petCat = cat => {
   // cat.petCount += 1;
@@ -21,30 +22,84 @@ const countTotalPets = catData => {
   }, 0);
 };
 
-function App() {
-  const [catData, setCatData] = useState(DATA);
+const kbaseURL = 'http://localhost:5000';
 
-  const handlePetCat = id => {
-    // console.log(id);
-    setCatData(catData => {
-      return catData.map(cat => {
-        if (cat.id === id) {
-          return petCat(cat);
-        } else {
-          return cat;
-        }
-      });
-    });
+const getAllCatsAPI = () => {
+  return axios.get(`${kbaseURL}/cats`)
+    .then(response => response.data)
+    .catch(error => console.log(error));
+};
+
+const convertFromAPI = (apiCat) => {
+  const newCat = {
+    ...apiCat,
+    caretaker: apiCat.caretaker ? apiCat.caretaker : 'Unknown',
+    caretakerId: apiCat.caretaker_id ? apiCat.caretaker_id : null,
+    petCount: apiCat.pet_count
   };
 
+  delete newCat.pet_count;
+  delete newCat.caretaker_id;
+
+  return newCat;
+};
+
+// getAllCatsAPI()
+//   .then(cats  => {
+//     const newCats = cats.map(convertFromAPI);
+//     console.log(newCats);
+//   });
+
+const petCatAPI = id => {
+  return axios.patch(`${kbaseURL}/cats/${id}/pet`);
+
+};
+
+const removeCatAPI = id => {
+  return axios.delete(`${kbaseURL}/cats/${id}`)
+    .catch(error => console.log(error));
+};
+
+function App() {
+  const [catData, setCatData] = useState([]);
+
+  const handlePetCat = id => {
+    return petCatAPI(id)
+      .then(() => {
+        return setCatData(catData => {
+          return catData.map(cat => cat.id === id ? petCat(cat) : cat);
+        });
+      });
+  };
+
+  // const handleUnregisterCat = id => {
+  //   // console.log(id);
+  //   setCatData(catData => {
+  //     return catData.filter(cat => cat.id !== id);
+  //   });
+  // };
+
   const handleUnregisterCat = id => {
-    // console.log(id);
-    setCatData(catData => {
-      return catData.filter(cat => cat.id !== id);
-    });
+    return removeCatAPI(id)
+      .then(() => {
+        return setCatData(catData => {
+          return catData.filter(cat => cat.id !== id);
+        });
+      });
   };
 
   const totalPets = countTotalPets(catData);
+
+  const getAllCats = () => {
+  return getAllCatsAPI()
+    .then(cats => {
+      const newCats = cats.map(convertFromAPI);
+      setCatData(newCats);
+    });
+};
+  useEffect(() => {
+    getAllCats();
+  },[]);
 
   return (
     <>
