@@ -3,6 +3,7 @@ import './App.css';
 import CatList from './components/CatList';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import NewCatForm from './components/NewCatForm';
 
 const petCat = cat => {
   // cat.petCount += 1;
@@ -101,9 +102,19 @@ function App() {
     getAllCats();
   },[]);
 
+const onHandleSubmit = (data) => {
+    axios.post(`${kbaseURL}/cats`, data)
+      .then(result => {
+        setCatData((prevCats) => [convertFromAPI(result.data), ...prevCats]);
+      })
+      .catch((e) => console.log(e));
+};
+
+
   return (
     <>
       <h2>Total Pets: {totalPets}</h2>
+      <NewCatForm onHandleSubmit={onHandleSubmit}/>
       <CatList
         cats={catData}
         onPetCat={handlePetCat}
