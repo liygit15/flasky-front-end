@@ -38,39 +38,30 @@ const NewCatForm = ({ onHandleSubmit }) => {
     // setName('');
   };
 
-  const makeControlledInput = (inputName) => {
-    return (
+  const makeControlledInput = (inputName, labelText) => {
+  const id = `input-${inputName}`;
+
+  return (
+    <div>
+      <label htmlFor={id}>{labelText}</label>
       <input
-        type='text'
+        type={'text'}
         name={inputName}
-        id={`input-${inputName}`}
+        id={id}
         value={formData[inputName]}
         onChange={handleChange}
       />
-    );
-  };
+    </div>
+  );
+};
+
 
   return (
     <form onSubmit={handleSubmit}>
-      <div>
-        <label htmlFor="name">Cat Name:</label>
-        {/* <input type="text" id="name" name="name" value={name} onChange={handleNameChange} /> */}
-        {makeControlledInput('name')}
-      </div>
-
-      <div>
-        <label htmlFor="color">Color:</label>
-        {makeControlledInput('color')}
-      </div>
-
-      <div>
-        <label htmlFor="personality">Personality:</label>
-        {makeControlledInput('personality')}
-      </div>
-
-      <div>
-        <input type="submit" value="Add a cat" />
-      </div>
+      {makeControlledInput('name', 'Cat Name')}
+      {makeControlledInput('color', 'Color')}
+      {makeControlledInput('personality', 'Personality')}
+      <input type="submit" value="Add a cat" />
     </form>
   );
 };
